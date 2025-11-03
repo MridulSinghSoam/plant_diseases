@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Crop Health Dashboard</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    body { background:#f6fbf4; margin:0; font-family: 'Segoe UI', Arial, sans-serif; color:#1a3e1a;}
+    .container { max-width:680px; margin:40px auto; padding:36px; background:#fff;
+      border-radius:15px; box-shadow:0 3px 19px rgba(60,95,30,0.09);}
+    h1 { color:#15733d; font-size:2em;}
+    .section {margin:28px 0; padding:16px 20px; background:#edfaed;
+      border-radius:8px;}
+    .upload-sec label {font-weight:600;}
+    .btn {background:#29853f;color:#fff; border:none; padding:10px 22px; border-radius:6px; font-size:1.1em; font-weight:600;}
+    .bar-bg {background:#e8f5e9; border-radius:12px; padding:2px;}
+    .bar {height:20px; border-radius:12px;}
+    .bar.good {background:#32bb4e; width:100%;}
+    .bar.medium {background:#ffb300; width:70%;}
+    .bar.bad {background:#e53a2b; width:40%;}
+    .img-preview {max-width:120px; max-height:70px; border:1px solid #cbe3c1; margin:0 7px 5px 0; border-radius:7px; object-fit:cover; background:#f1fdf1;}
+    .history-list { display:flex; flex-wrap:wrap;}
+    .history-label {margin-top:18px; font-weight:600;}
+    .pest-list {margin-left:20px;}
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>Crop Health Dashboard</h1>
+  <form class="upload-sec" method="post" enctype="multipart/form-data">
+      <label>Upload new leaf image:</label>
+      <input type="file" name="image" accept="image/*" required>
+      <button class="btn" type="submit">Diagnose</button>
+  </form>
+
+  {% if img_preview and prediction %}
+    <div class="section">
+      <strong>Latest Upload:</strong><br>
+      <img class="img-preview" src="data:image/jpeg;base64,{{ img_preview }}"/>
+      <div style="font-size:1.1em;">Predicted Disease: <b>{{ prediction.replace('Tomato___','').replace('_',' ') }}</b></div>
+      <div>
+        <b>Action Steps:</b>
+        <ul>
+          {% for rec in recommendations %}
+            <li>{{ rec }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  {% endif %}
+
+  <div class="section">
+    <span class="history-label">Recent Diagnoses:</span>
+    <div class="history-list">
+      {% for rec in history %}
+        <div>
+          <img class="img-preview" src="data:image/jpeg;base64,{{ rec.b64 }}"/>
+          <div style="font-size:.93em;">{{ rec.prediction.replace('Tomato___','').replace('_',' ') }}</div>
+        </div>
+      {% endfor %}
+    </div>
+    <div style="margin-top:16px;">
+      <span><b>Crop Quality (Recent uploads):</b></span>
+      <div class="bar-bg"><div class="bar {{quality_bar}}"></div></div>
+      <div style="color:#367e36;font-size:.95em;margin-top:4px;"><b>Status:</b> {{ quality_status }}</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <b>Recommended Pesticides:</b>
+    <ul class="pest-list">
+      {% for p in pesticide_list %}
+        <li>{{ p }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <a href="/reset" onclick="fetch('/reset').then(()=>window.location.reload());return false;" style="font-size:0.92em; color:#196a12;">Reset history</a>
+</div>
+</body>
+</html>

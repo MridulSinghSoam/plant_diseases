@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marine Population Analysis Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/date-fns@2.29.3/index.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>Marine Population Analysis Tool</h1>
+            <p class="subtitle">Scientific assessment of fish species survival and conservation planning</p>
+        </header>
+
+        <main class="main-content">
+            <div class="form-container">
+                <form id="fishForm" class="fish-form">
+                    <div class="form-group">
+                        <label for="fishSpecies">Fish Species</label>
+                        <input type="text" id="fishSpecies" name="fishSpecies" placeholder="e.g., Atlantic Salmon, Bluefin Tuna, Cod" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="location">Geographic Location</label>
+                        <input type="text" id="location" name="location" placeholder="e.g., North Atlantic, Pacific Ocean, Great Lakes" required>
+                    </div>
+
+                    <button type="submit" class="submit-btn" id="submitBtn">
+                        <span class="btn-text">Analyze Population Trends</span>
+                        <span class="loading-spinner" style="display: none;">⏳</span>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Dashboard Container -->
+            <div id="dashboard" class="dashboard-container" style="display: none;">
+                <div class="dashboard-header">
+                    <h2>Species Analysis Dashboard</h2>
+                    <div class="analysis-timestamp" id="analysisTimestamp"></div>
+                </div>
+
+                <!-- Main Dashboard Grid -->
+                <div class="dashboard-grid">
+                    <!-- Population Trends Chart -->
+                    <div class="dashboard-card chart-card">
+                        <h3>Population Trends</h3>
+                        <canvas id="populationChart"></canvas>
+                    </div>
+
+                    <!-- Extinction Timeline -->
+                    <div class="dashboard-card timeline-card">
+                        <h3>Extinction Risk Timeline</h3>
+                        <div class="timeline-container">
+                            <div class="timeline-item" id="currentStatus">
+                                <div class="timeline-marker current"></div>
+                                <div class="timeline-content">
+                                    <h4>Current Status</h4>
+                                    <p id="currentPopulation"></p>
+                                </div>
+                            </div>
+                            <div class="timeline-item" id="extinctionPrediction">
+                                <div class="timeline-marker risk"></div>
+                                <div class="timeline-content">
+                                    <h4>Projected Extinction</h4>
+                                    <p id="extinctionDate"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Map -->
+                    <div class="dashboard-card map-card">
+                        <h3>Geographic Distribution</h3>
+                        <div id="speciesMap"></div>
+                    </div>
+
+                    <!-- Environmental Factors -->
+                    <div class="dashboard-card factors-card" style="grid-row: 3; grid-column: 1;">
+                        <h3>Environmental Risk Factors</h3>
+                        <canvas id="riskFactorsChart"></canvas>
+                    </div>
+
+                    <!-- Conservation Status -->
+                    <div class="dashboard-card status-card">
+                        <h3>Conservation Status</h3>
+                        <div class="status-indicators">
+                            <div class="status-item">
+                                <span class="status-label">Population Health</span>
+                                <div class="status-bar">
+                                    <div class="status-fill" id="populationHealth"></div>
+                                </div>
+                            </div>
+                            <div class="status-item">
+                                <span class="status-label">Habitat Quality</span>
+                                <div class="status-bar">
+                                    <div class="status-fill" id="habitatQuality"></div>
+                                </div>
+                            </div>
+                            <div class="status-item">
+                                <span class="status-label">Threat Level</span>
+                                <div class="status-bar">
+                                    <div class="status-fill" id="threatLevel"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Detailed Analysis -->
+                    <div class="dashboard-card analysis-card full-width">
+                        <h3>Detailed Analysis Report</h3>
+                        <div id="detailedAnalysis"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading Timeline -->
+            <div id="loadingTimeline" class="loading-timeline" style="display: none;">
+                <h3>Analysis Progress</h3>
+                <div class="timeline-steps">
+                    <div class="timeline-step" id="step-api">
+                        <div class="step-indicator">
+                            <div class="step-icon">🔌</div>
+                            <div class="step-status"></div>
+                        </div>
+                        <div class="step-content">
+                            <h4>API Connection</h4>
+                            <p>Connecting to DeepSeek AI...</p>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-step" id="step-prediction">
+                        <div class="step-indicator">
+                            <div class="step-icon">🤖</div>
+                            <div class="step-status"></div>
+                        </div>
+                        <div class="step-content">
+                            <h4>AI Analysis</h4>
+                            <p>Generating population predictions...</p>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-step" id="step-charts">
+                        <div class="step-indicator">
+                            <div class="step-icon">📊</div>
+                            <div class="step-status"></div>
+                        </div>
+                        <div class="step-content">
+                            <h4>Data Visualization</h4>
+                            <p>Creating charts and graphs...</p>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-step" id="step-map">
+                        <div class="step-indicator">
+                            <div class="step-icon">🗺️</div>
+                            <div class="step-status"></div>
+                        </div>
+                        <div class="step-content">
+                            <h4>Geographic Mapping</h4>
+                            <p>Loading interactive map...</p>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-step" id="step-dashboard">
+                        <div class="step-indicator">
+                            <div class="step-icon">📋</div>
+                            <div class="step-status"></div>
+                        </div>
+                        <div class="step-content">
+                            <h4>Dashboard Ready</h4>
+                            <p>Finalizing analysis report...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="error" class="error-container" style="display: none;">
+                <h3>⚠️ Error</h3>
+                <p id="errorMessage"></p>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>Marine Conservation Research Tool • Scientific Analysis Platform</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
