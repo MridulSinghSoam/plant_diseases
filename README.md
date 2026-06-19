@@ -1,3 +1,4 @@
+<img width="1024" height="624" alt="7691229930958972095" src="https://github.com/user-attachments/assets/56c02549-c954-42f0-a09b-b77979f264ad" />
 # 🌿 Generalized Plant Disease Detection Application
 ![Uploading 7691229930958972095.jpg…]()
 
