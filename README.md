@@ -6,6 +6,9 @@ This repository provides an extensible framework for building and deploying a we
 The core design allows for seamless swapping of the underlying model to support diverse crops.
 
 ---
+<p align="center">
+  <img src="image_1.png" alt="Plant Disease Detection Infographic" width="100%">
+</p>
 
 ## 🏗️ Visual Documentation: User Flow and Development
 
